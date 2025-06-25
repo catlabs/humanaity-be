@@ -4,25 +4,21 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import jakarta.persistence.*;
-import java.math.BigDecimal;
+
+import java.util.List;
 
 @Entity
-@Table(name = "products")
+@Table(name = "cities")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Product {
+public class City {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     private String name;
 
-    private String description;
-
-    @Column(nullable = false)
-    private BigDecimal price;
-
-    private Integer quantity;
+    @OneToMany(mappedBy = "city", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Human> humans;
 }

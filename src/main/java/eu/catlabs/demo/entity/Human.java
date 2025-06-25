@@ -1,29 +1,27 @@
 package eu.catlabs.demo.entity;
 
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 
 @Entity
-@Table(name = "users")
+@Table(name = "humans")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class Human {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String firstName;
+    private String name;
+    private int age;
+    private String job;
+    private double happiness;
 
-    @Column(nullable = false)
-    private String lastName;
-
-    @Column(unique = true, nullable = false)
-    private String email;
-
-    private Integer age;
+    @ManyToOne
+    @JoinColumn(name = "city_id")
+    private City city;
 }

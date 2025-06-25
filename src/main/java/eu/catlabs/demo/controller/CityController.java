@@ -1,37 +1,37 @@
 package eu.catlabs.demo.controller;
 
-import eu.catlabs.demo.entity.User;
-import eu.catlabs.demo.repository.UserRepository;
+import eu.catlabs.demo.entity.City;
+import eu.catlabs.demo.repository.CityRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/users")
-public class UserController {
+@RequestMapping("/api/cities")
+public class CityController {
 
-    private final UserRepository repository;
+    private final CityRepository repository;
 
-    public UserController(UserRepository repository) {
+    public CityController(CityRepository repository) {
         this.repository = repository;
     }
 
     @GetMapping
-    public List<User> getAllUsers() {
+    public List<City> getAllCities() {
         return repository.findAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+    public ResponseEntity<City> getUserById(@PathVariable Long id) {
         return repository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public User createUser(@RequestBody User user) {
-        return repository.save(user);
+    public City createCity(@RequestBody City city) {
+        return repository.save(city);
     }
 
     @DeleteMapping("/{id}")
