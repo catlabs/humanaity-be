@@ -12,24 +12,24 @@ public class HumanService {
     @Autowired
     private HumanRepository humanRepository;
 
-    public List<Human> getAllProducts() {
+    public List<Human> getAllHumans() {
         return humanRepository.findAll();
     }
 
-    public Human getProductById(Long id) {
+    public Human getHumanById(Long id) {
         return humanRepository.findById(id).orElse(null);
     }
 
-    public Human createProduct(Human human) {
+    public Human createHuman(Human human) {
         return humanRepository.save(human);
     }
 
-    public Human updateProduct(Long id, Human human) {
+    public Human updateHuman(Long id, Human human) {
         human.setId(id);
         return humanRepository.save(human);
     }
 
-    public void deleteProduct(Long id) {
+    public void deleteHuman(Long id) {
         humanRepository.deleteById(id);
     }
 }

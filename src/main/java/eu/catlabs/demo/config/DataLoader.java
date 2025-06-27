@@ -8,9 +8,6 @@ import com.github.javafaker.Faker;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
@@ -29,12 +26,10 @@ public class DataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        List<City> cities = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             City city = new City();
             city.setName(faker.address().city());
             cityRepository.save(city);
-            List<Human> humans = new ArrayList<>();
             for (int j = 0; j < 20; j++) {
                 String name = faker.name().fullName();
                 int age = random.nextInt(60);
@@ -44,13 +39,7 @@ public class DataLoader implements CommandLineRunner {
                 human.setCity(city);
                 human.setHappiness(random.nextDouble());
                 humanRepository.save(human);
-                humans.add(human);
             }
-            // city.setHumans(humans);
-
-            cities.add(city);
         }
-
-        cities.stream().limit(10).forEach(System.out::println);
     }
 }

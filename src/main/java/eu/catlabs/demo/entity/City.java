@@ -8,7 +8,6 @@ import jakarta.persistence.*;
 import java.util.List;
 
 @Entity
-@Table(name = "cities")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,7 +15,6 @@ public class City {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String name;
 
     @OneToMany(mappedBy = "city", cascade = CascadeType.ALL, orphanRemoval = true)
