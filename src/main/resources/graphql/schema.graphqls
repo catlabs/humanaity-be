@@ -20,10 +20,18 @@ type Mutation {
 type Human {
     id: ID!
     name: String!
-    age: Int
+    age: Int!
     job: String
-    happiness: Float
-    city: City
+    happiness: Float!
+    city: City!
+}
+
+input HumanInput {
+    name: String!
+    age: Int!
+    job: String
+    happiness: Float!
+    cityId: ID!
 }
 
 type City {
@@ -36,11 +44,5 @@ input CityInput {
     name: String!
 }
 
-input HumanInput {
-    name: String!
-    age: Int
-    job: String
-    happiness: Float
-    cityId: ID
-}
+
 

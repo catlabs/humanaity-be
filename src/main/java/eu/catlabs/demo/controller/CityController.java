@@ -1,41 +1,58 @@
 package eu.catlabs.demo.controller;
 
+import eu.catlabs.demo.dto.CityInput;
 import eu.catlabs.demo.entity.City;
-import eu.catlabs.demo.repository.CityRepository;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import eu.catlabs.demo.services.CityService;
+import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.MutationMapping;
+import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/cities")
 public class CityController {
+    private final CityService cityService;
 
-    private final CityRepository repository;
-
-    public CityController(CityRepository repository) {
-        this.repository = repository;
+    public CityController(CityService cityService) {
+        this.cityService = cityService;
     }
 
-    @GetMapping
-    public List<City> getAllCities() {
-        return repository.findAll();
+    @QueryMapping
+    public List<City> cities() {
+        return cityService.getAllCities();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<City> getUserById(@PathVariable Long id) {
-        return repository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    @QueryMapping
+    public List<City> citiesByName(@Argument String name) {
+        return cityService.getCitiesByName(name);
     }
 
-    @PostMapping
-    public City createCity(@RequestBody City city) {
-        return repository.save(city);
+    @QueryMapping
+    public Optional<City> city(@Argument String id) {
+        return cityService.getCityById(id);
     }
 
-    @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable Long id) {
-        repository.deleteById(id);
+    @MutationMapping
+    public City createCity(@Argument CityInput input) {
+        return cityService.createCity(input);
+    }
+
+    @MutationMapping
+    public City updateCity(@Argument String id, @Argument CityInput input) {
+        return cityService.updateCity(id, input);
+    }
+
+    @MutationMapping
+    public Boolean deleteCity(@Argument String id) {
+        try {
+            cityService.deleteCity(Long.parseLong(id));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

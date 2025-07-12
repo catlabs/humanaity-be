@@ -1,35 +1,78 @@
 package eu.catlabs.demo.services;
 
+import eu.catlabs.demo.dto.HumanInput;
+import eu.catlabs.demo.entity.City;
 import eu.catlabs.demo.entity.Human;
+import eu.catlabs.demo.repository.CityRepository;
 import eu.catlabs.demo.repository.HumanRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class HumanService {
-    @Autowired
-    private HumanRepository humanRepository;
+    private final HumanRepository humanRepository;
+    private final CityRepository cityRepository;
+
+    public HumanService(HumanRepository humanRepository, CityRepository cityRepository) {
+        this.humanRepository = humanRepository;
+        this.cityRepository = cityRepository;
+    }
 
     public List<Human> getAllHumans() {
         return humanRepository.findAll();
     }
 
-    public Human getHumanById(Long id) {
-        return humanRepository.findById(id).orElse(null);
+    public Optional<Human> getHumanById(Long id) {
+        return humanRepository.findById(id);
     }
 
-    public Human createHuman(Human human) {
+    public List<Human> getHumansByCityId(String cityId) {
+        return humanRepository.findByCityId(Long.parseLong(cityId));
+    }
+
+    public List<Human> getHumansByJob(String job) {
+        return humanRepository.findByJobContainingIgnoreCase(job);
+    }
+
+    public Human createHuman(HumanInput input) {
+        Human human = new Human();
+        updateHumanFields(human, input);
+        setHumanCity(human, input.getCityId());
         return humanRepository.save(human);
     }
 
-    public Human updateHuman(Long id, Human human) {
-        human.setId(id);
+    public Human updateHuman(String id, HumanInput input) {
+        Human human = humanRepository.findById(Long.parseLong(id))
+                .orElseThrow(() -> new EntityNotFoundException("Human not found"));
+
+        updateHumanFields(human, input);
+        setHumanCity(human, input.getCityId());
         return humanRepository.save(human);
     }
 
-    public void deleteHuman(Long id) {
-        humanRepository.deleteById(id);
+    private void updateHumanFields(Human human, HumanInput input) {
+        human.setName(input.getName());
+        human.setAge(input.getAge());
+        human.setJob(input.getJob());
+        human.setHappiness(input.getHappiness());
+    }
+
+    private void setHumanCity(Human human, String cityId) {
+        if (cityId != null) {
+            Optional<City> city = cityRepository.findById(Long.parseLong(cityId));
+            city.ifPresent(human::setCity);
+        }
+    }
+
+    public boolean deleteHuman(Long id) {
+        try {
+            humanRepository.deleteById(id);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

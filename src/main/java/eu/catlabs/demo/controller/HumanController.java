@@ -1,48 +1,66 @@
 package eu.catlabs.demo.controller;
 
+import eu.catlabs.demo.dto.HumanInput;
 import eu.catlabs.demo.entity.Human;
+import eu.catlabs.demo.repository.CityRepository;
+import eu.catlabs.demo.repository.HumanRepository;
 import eu.catlabs.demo.services.HumanService;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.MutationMapping;
+import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/humans")
 public class HumanController {
 
+    private final HumanRepository humanRepository;
     private final HumanService humanService;
+    private final CityRepository cityRepository;
 
-    public HumanController(HumanService humanService) {
+    public HumanController(HumanService humanService, HumanRepository humanRepository, CityRepository cityRepository) {
+        this.humanRepository = humanRepository;
         this.humanService = humanService;
+        this.cityRepository = cityRepository;
     }
 
-    // GET all products
-    @GetMapping
-    public List<Human> getAllHumans() {
+    @QueryMapping
+    public List<Human> humans() {
         return humanService.getAllHumans();
     }
 
-    // GET one product by ID
-    @GetMapping("/{id}")
-    public Human getProductById(@PathVariable Long id) {
-        return humanService.getHumanById(id);
+    @QueryMapping
+    public Optional<Human> human(@Argument String id) {
+        return humanService.getHumanById(Long.parseLong(id));
     }
 
-    // POST: Create new product
-    @PostMapping
-    public Human createProduct(@RequestBody Human human) {
-        return humanService.createHuman(human);
+    @QueryMapping
+    public List<Human> humansByCity(@Argument String cityId) {
+        return humanService.getHumansByCityId(cityId);
     }
 
-    // PUT: Update product
-    @PutMapping("/{id}")
-    public Human updateProduct(@PathVariable Long id, @RequestBody Human human) {
-        return humanService.updateHuman(id, human);
+    @QueryMapping
+    public List<Human> humansByJob(@Argument String job) {
+        return humanService.getHumansByJob(job);
     }
 
-    // DELETE: Delete product
-    @DeleteMapping("/{id}")
-    public void deleteProduct(@PathVariable Long id) {
-        humanService.deleteHuman(id);
+    @MutationMapping
+    public Human createHuman(@Argument HumanInput input) {
+        return humanService.createHuman(input);
     }
+
+    @MutationMapping
+    public Human updateHuman(@Argument String id, @Argument HumanInput input) {
+        return humanService.updateHuman(id, input);
+    }
+
+    @MutationMapping
+    public Boolean deleteHuman(@Argument String id) {
+        return humanService.deleteHuman(Long.parseLong(id));
+    }
+
 }
