@@ -1,5 +1,5 @@
 type Query {
-    cities: [City]
+    cities: [City!]!
     city(id: ID!): City
     citiesByName(name: String!): [City]
     human(id: ID!): Human
