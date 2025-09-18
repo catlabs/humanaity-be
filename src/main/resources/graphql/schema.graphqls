@@ -1,11 +1,11 @@
 type Query {
     cities: [City!]!
-    city(id: ID!): City
-    citiesByName(name: String!): [City]
-    human(id: ID!): Human
-    humans: [Human]
-    humansByCity(cityId: ID!): [Human]
-    humansByJob(job: String!): [Human]
+    city(id: ID!): City!
+    citiesByName(name: String!): [City]!
+    human(id: ID!): Human!
+    humans: [Human!]!
+    humansByCity(cityId: ID!): [Human!]!
+    humansByJob(job: String!): [Human!]!
 }
 
 type Mutation {
@@ -15,29 +15,40 @@ type Mutation {
     createCity(input: CityInput!): City
     updateCity(id: ID!, input: CityInput!): City
     deleteCity(id: ID!): Boolean
+    startSimulation(cityId: ID!): String!
+    stopSimulation(cityId: ID!): String!
+    isSimulationRunning(cityId: ID!): Boolean!
+}
+
+type Subscription {
+    humansByCityPositions(cityId: ID!): [Human!]!
 }
 
 type Human {
     id: ID!
-    name: String!
-    age: Int!
-    job: String
+    age: Int
+    city: City
     happiness: Float!
-    city: City!
+    job: String
+    name: String
+    x: Float!
+    y: Float!
 }
 
 input HumanInput {
-    name: String!
     age: Int!
-    job: String
-    happiness: Float!
     cityId: ID!
+    happiness: Float!
+    job: String
+    name: String!
+    x: Float!
+    y: Float!
 }
 
 type City {
     id: ID!
-    name: String!
-    humans: [Human]
+    name: String
+    humans: [Human!]
 }
 
 input CityInput {

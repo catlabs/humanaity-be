@@ -1,9 +1,9 @@
 package eu.catlabs.demo.entity;
 
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import jakarta.persistence.*;
 
 @Entity
 @Data
@@ -14,10 +14,12 @@ public class Human {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-    private int age;
-    private String job;
     private double happiness;
+    private String job;
+    private int age;
+    private String name;
+    private double x;
+    private double y;
 
     @ManyToOne
     private City city;

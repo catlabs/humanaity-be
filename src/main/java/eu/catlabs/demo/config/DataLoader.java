@@ -1,10 +1,10 @@
 package eu.catlabs.demo.config;
 
+import com.github.javafaker.Faker;
 import eu.catlabs.demo.entity.City;
 import eu.catlabs.demo.entity.Human;
-import eu.catlabs.demo.repository.HumanRepository;
 import eu.catlabs.demo.repository.CityRepository;
-import com.github.javafaker.Faker;
+import eu.catlabs.demo.repository.HumanRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -38,6 +38,8 @@ public class DataLoader implements CommandLineRunner {
                 human.setAge(age);
                 human.setCity(city);
                 human.setHappiness(random.nextDouble());
+                human.setX(faker.number().randomDouble(3, 0, 1));
+                human.setY(faker.number().randomDouble(3, 0, 1));
                 humanRepository.save(human);
             }
         }
