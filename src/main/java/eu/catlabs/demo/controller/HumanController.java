@@ -1,7 +1,7 @@
 package eu.catlabs.demo.controller;
 
 import eu.catlabs.demo.dto.HumanInput;
-import eu.catlabs.demo.entity.Human;
+import eu.catlabs.demo.dto.HumanOutput;
 import eu.catlabs.demo.repository.CityRepository;
 import eu.catlabs.demo.repository.HumanRepository;
 import eu.catlabs.demo.services.HumanService;
@@ -31,32 +31,22 @@ public class HumanController {
     }
 
     @QueryMapping
-    public List<Human> humans() {
-        return humanService.getAllHumans();
-    }
-
-    @QueryMapping
-    public Optional<Human> human(@Argument String id) {
+    public Optional<HumanOutput> human(@Argument String id) {
         return humanService.getHumanById(Long.parseLong(id));
     }
 
     @QueryMapping
-    public List<Human> humansByCity(@Argument String cityId) {
+    public List<HumanOutput> humansByCity(@Argument String cityId) {
         return humanService.getHumansByCityId(cityId);
     }
 
-    @QueryMapping
-    public List<Human> humansByJob(@Argument String job) {
-        return humanService.getHumansByJob(job);
-    }
-
     @MutationMapping
-    public Human createHuman(@Argument HumanInput input) {
+    public HumanOutput createHuman(@Argument HumanInput input) {
         return humanService.createHuman(input);
     }
 
     @MutationMapping
-    public Human updateHuman(@Argument String id, @Argument HumanInput input) {
+    public HumanOutput updateHuman(@Argument String id, @Argument HumanInput input) {
         return humanService.updateHuman(id, input);
     }
 
@@ -66,7 +56,7 @@ public class HumanController {
     }
 
     @SubscriptionMapping
-    public Publisher<List<Human>> humansByCityPositions(@Argument String cityId) {
+    public Publisher<List<HumanOutput>> humansByCityPositions(@Argument String cityId) {
         return humanService.getCityPositionsStream(Long.parseLong(cityId));
     }
 

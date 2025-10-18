@@ -4,6 +4,7 @@ import eu.catlabs.demo.entity.Human;
 import eu.catlabs.demo.repository.HumanRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -30,7 +31,7 @@ public class SimulationService {
 
         ScheduledFuture<?> task = executor.scheduleAtFixedRate(
                 () -> simulateCity(cityId),
-                0, 1000, TimeUnit.MILLISECONDS
+                0, 100, TimeUnit.MILLISECONDS
         );
 
         runningTasks.put(cityId, task);
@@ -54,18 +55,21 @@ public class SimulationService {
 
     private void simulateCity(Long cityId) {
         try {
-            List<Human> humans = humanRepository.findByCityId(cityId);
+            List<Human> allHumans = humanRepository.findByCityId(cityId);
+            Collections.shuffle(allHumans);
+            List<Human> randomHumans = allHumans.stream().limit(10).toList();
 
-            if (humans.isEmpty()) {
+            if (randomHumans.isEmpty()) {
                 System.out.println("No humans found in city " + cityId);
                 return;
             }
 
-            for (Human human : humans) {
+            for (Human human : randomHumans) {
                 updateHumanPosition(human);
-                // Use the humanService to update and publish
-                humanService.updateHumanPosition(human);
             }
+
+            // Publish to subscribers
+            this.humanService.publishHumanUpdates(randomHumans);
 
         } catch (Exception e) {
             System.err.println("Error simulating city " + cityId + ": " + e.getMessage());

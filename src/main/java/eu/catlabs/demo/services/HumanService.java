@@ -1,6 +1,7 @@
 package eu.catlabs.demo.services;
 
 import eu.catlabs.demo.dto.HumanInput;
+import eu.catlabs.demo.dto.HumanOutput;
 import eu.catlabs.demo.entity.City;
 import eu.catlabs.demo.entity.Human;
 import eu.catlabs.demo.repository.CityRepository;
@@ -22,7 +23,7 @@ public class HumanService {
     private final CityRepository cityRepository;
 
     // Subscription-related fields
-    private final Sinks.Many<Human> humanUpdateSink = Sinks.many().multicast().onBackpressureBuffer();
+    private final Sinks.Many<List<Human>> humansUpdateSink = Sinks.many().multicast().onBackpressureBuffer();
     private final ConcurrentHashMap<Long, Human> lastPositions = new ConcurrentHashMap<>();
 
     public HumanService(HumanRepository humanRepository, CityRepository cityRepository) {
@@ -30,35 +31,41 @@ public class HumanService {
         this.cityRepository = cityRepository;
     }
 
-    // Existing CRUD methods
-    public List<Human> getAllHumans() {
-        return humanRepository.findAll();
+    public Optional<HumanOutput> getHumanById(Long id) {
+        return humanRepository.findById(id)
+                .map(this::toHumanOutput);
     }
 
-    public Optional<Human> getHumanById(Long id) {
-        return humanRepository.findById(id);
+    public List<HumanOutput> getHumansByCityId(String cityId) {
+        return humanRepository.findByCityId(Long.parseLong(cityId)).stream()
+                .map(this::toHumanOutput)
+                .toList();
     }
 
-    public List<Human> getHumansByCityId(String cityId) {
-        return humanRepository.findByCityId(Long.parseLong(cityId));
-    }
-
-    public List<Human> getHumansByJob(String job) {
-        return humanRepository.findByJobContainingIgnoreCase(job);
-    }
-
-    public Human createHuman(HumanInput input) {
+    public HumanOutput createHuman(HumanInput input) {
         Human human = new Human();
         updateHumanFields(human, input);
         setHumanCity(human, input.getCityId());
         Human savedHuman = humanRepository.save(human);
 
         // Publish the new human to subscribers
-        publishHumanUpdate(savedHuman);
-        return savedHuman;
+        // publishHumanUpdate(savedHuman);
+
+        return toHumanOutput(savedHuman);
     }
 
-    public Human updateHuman(String id, HumanInput input) {
+    private HumanOutput toHumanOutput(Human human) {
+        HumanOutput output = new HumanOutput();
+        output.setId(human.getId());
+        output.setName(human.getName());
+        output.setJob(human.getJob());
+        output.setHappiness(human.getHappiness());
+        output.setY(human.getY());
+        output.setX(human.getX());
+        return output;
+    }
+
+    public HumanOutput updateHuman(String id, HumanInput input) {
         Human human = humanRepository.findById(Long.parseLong(id))
                 .orElseThrow(() -> new EntityNotFoundException("Human not found"));
 
@@ -67,8 +74,8 @@ public class HumanService {
         Human updatedHuman = humanRepository.save(human);
 
         // Publish the update to subscribers
-        publishHumanUpdate(updatedHuman);
-        return updatedHuman;
+        // publishHumanUpdate(updatedHuman);
+        return toHumanOutput(updatedHuman);
     }
 
     public boolean deleteHuman(Long id) {
@@ -96,16 +103,16 @@ public class HumanService {
         }
     }
 
-    // Subscription methods
-    public void publishHumanUpdate(Human human) {
-        lastPositions.put(human.getId(), human);
-        humanUpdateSink.tryEmitNext(human);
+    public void publishHumanUpdates(List<Human> humans) {
+        humans.forEach(human -> lastPositions.put(human.getId(), human));
+        humansUpdateSink.tryEmitNext(humans);
     }
 
-    public Publisher<List<Human>> getCityPositionsStream(Long cityId) {
-        return Flux.interval(Duration.ofMillis(1000))
+    public Publisher<List<HumanOutput>> getCityPositionsStream(Long cityId) {
+        return Flux.interval(Duration.ofMillis(100))
                 .map(tick -> lastPositions.values().stream()
                         .filter(human -> human.getCity() != null && human.getCity().getId().equals(cityId))
+                        .map(this::toHumanOutput)
                         .toList());
     }
 
@@ -113,11 +120,5 @@ public class HumanService {
         lastPositions.remove(humanId);
     }
 
-    // Method for simulation service to update positions
-    public void updateHumanPosition(Human human) {
-        // Update the database
-        humanRepository.save(human);
-        // Publish to subscribers
-        publishHumanUpdate(human);
-    }
+
 }

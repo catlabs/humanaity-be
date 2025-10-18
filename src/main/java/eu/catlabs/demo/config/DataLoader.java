@@ -30,7 +30,7 @@ public class DataLoader implements CommandLineRunner {
             City city = new City();
             city.setName(faker.address().city());
             cityRepository.save(city);
-            for (int j = 0; j < 20; j++) {
+            for (int j = 0; j < 200; j++) {
                 String name = faker.name().fullName();
                 int age = random.nextInt(60);
                 Human human = new Human();
