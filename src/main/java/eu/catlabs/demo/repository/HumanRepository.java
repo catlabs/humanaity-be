@@ -10,11 +10,5 @@ import java.util.List;
 public interface HumanRepository extends JpaRepository<Human, Long> {
     List<Human> findByCityId(Long cityId);
 
-    List<Human> findByJobContainingIgnoreCase(String job);
-
-//     @Query("SELECT h FROM Human h WHERE h.happiness >= :minHappiness")
-//    List<Human> findByHappinessGreaterThanEqual(@Param("minHappiness") double minHappiness);
-//
-//    @Query("SELECT h FROM Human h WHERE h.age BETWEEN :minAge AND :maxAge")
-//    List<Human> findByAgeBetween(@Param("minAge") int minAge, @Param("maxAge") int maxAge);
+    List<Human> findByCityIdAndBusyTrue(Long cityId); // Add this method
 }

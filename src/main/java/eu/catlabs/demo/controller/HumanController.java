@@ -2,8 +2,6 @@ package eu.catlabs.demo.controller;
 
 import eu.catlabs.demo.dto.HumanInput;
 import eu.catlabs.demo.dto.HumanOutput;
-import eu.catlabs.demo.repository.CityRepository;
-import eu.catlabs.demo.repository.HumanRepository;
 import eu.catlabs.demo.services.HumanService;
 import org.reactivestreams.Publisher;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -20,14 +18,10 @@ import java.util.Optional;
 @RequestMapping("/api/humans")
 public class HumanController {
 
-    private final HumanRepository humanRepository;
     private final HumanService humanService;
-    private final CityRepository cityRepository;
 
-    public HumanController(HumanService humanService, HumanRepository humanRepository, CityRepository cityRepository) {
-        this.humanRepository = humanRepository;
+    public HumanController(HumanService humanService) {
         this.humanService = humanService;
-        this.cityRepository = cityRepository;
     }
 
     @QueryMapping

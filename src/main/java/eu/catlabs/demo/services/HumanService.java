@@ -10,7 +10,6 @@ import jakarta.persistence.EntityNotFoundException;
 import org.reactivestreams.Publisher;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Sinks;
 
 import java.time.Duration;
 import java.util.List;
@@ -22,8 +21,6 @@ public class HumanService {
     private final HumanRepository humanRepository;
     private final CityRepository cityRepository;
 
-    // Subscription-related fields
-    private final Sinks.Many<List<Human>> humansUpdateSink = Sinks.many().multicast().onBackpressureBuffer();
     private final ConcurrentHashMap<Long, Human> lastPositions = new ConcurrentHashMap<>();
 
     public HumanService(HumanRepository humanRepository, CityRepository cityRepository) {
@@ -57,6 +54,7 @@ public class HumanService {
     private HumanOutput toHumanOutput(Human human) {
         HumanOutput output = new HumanOutput();
         output.setId(human.getId());
+        output.setBusy(human.isBusy());
         output.setName(human.getName());
         output.setJob(human.getJob());
         output.setHappiness(human.getHappiness());
@@ -105,15 +103,18 @@ public class HumanService {
 
     public void publishHumanUpdates(List<Human> humans) {
         humans.forEach(human -> lastPositions.put(human.getId(), human));
-        humansUpdateSink.tryEmitNext(humans);
     }
 
     public Publisher<List<HumanOutput>> getCityPositionsStream(Long cityId) {
         return Flux.interval(Duration.ofMillis(100))
-                .map(tick -> lastPositions.values().stream()
-                        .filter(human -> human.getCity() != null && human.getCity().getId().equals(cityId))
-                        .map(this::toHumanOutput)
-                        .toList());
+                .map(tick -> {
+                    List<HumanOutput> changes = lastPositions.values().stream()
+                            .filter(human -> human.getCity() != null && human.getCity().getId().equals(cityId))
+                            .map(this::toHumanOutput)
+                            .toList();
+                    lastPositions.clear();
+                    return changes;
+                });
     }
 
     public void removeHumanFromSubscriptions(Long humanId) {

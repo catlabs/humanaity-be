@@ -4,15 +4,13 @@ import eu.catlabs.demo.entity.Human;
 import eu.catlabs.demo.repository.HumanRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.*;
 
 @Service
 public class SimulationService {
 
+    private static final double COLLISION_DISTANCE = 0.02;
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(4);
     private final Map<Long, ScheduledFuture<?>> runningTasks = new ConcurrentHashMap<>();
     private final HumanRepository humanRepository;
@@ -64,16 +62,54 @@ public class SimulationService {
                 return;
             }
 
-            for (Human human : randomHumans) {
-                updateHumanPosition(human);
-            }
+            Set<Human> changedHumans = new HashSet<>();
 
-            // Publish to subscribers
+            for (Human human : randomHumans) {
+                if (!human.isBusy()) {
+                    boolean hadCollision = checkCollisions(human, allHumans, changedHumans);
+                    if (!hadCollision) {
+                        updateHumanPosition(human);
+                        changedHumans.add(human);
+                    }
+                }
+
+            }
+            if (!changedHumans.isEmpty()) {
+                humanRepository.saveAll(changedHumans);
+            }
             this.humanService.publishHumanUpdates(randomHumans);
 
         } catch (Exception e) {
             System.err.println("Error simulating city " + cityId + ": " + e.getMessage());
         }
+    }
+
+    private boolean checkCollisions(Human currentHuman, List<Human> allHumans, Set<Human> changedHumans) {
+        for (Human otherHuman : allHumans) {
+            if (currentHuman.getId().equals(otherHuman.getId())) {
+                continue;
+            }
+
+            if (areHumansColliding(currentHuman, otherHuman)) {
+                currentHuman.setBusy(true);
+                otherHuman.setBusy(true);
+
+                changedHumans.add(currentHuman);
+                changedHumans.add(otherHuman);
+
+                // handleCollision(currentHuman, otherHuman);
+                return true; // Had collision
+            }
+        }
+        return false; // No collision
+    }
+
+    private boolean areHumansColliding(Human human1, Human human2) {
+        double distance = Math.sqrt(
+                Math.pow(human1.getX() - human2.getX(), 2) +
+                        Math.pow(human1.getY() - human2.getY(), 2)
+        );
+        return distance < COLLISION_DISTANCE;
     }
 
     private void updateHumanPosition(Human human) {
@@ -89,6 +125,12 @@ public class SimulationService {
         double happinessChange = (random.nextDouble() - 0.5) * 0.1;
         double newHappiness = Math.max(0, Math.min(1, human.getHappiness() + happinessChange));
         human.setHappiness(newHappiness);
+    }
+
+    public void resetBusyStatus(Long cityId) {
+        List<Human> busyHumans = humanRepository.findByCityIdAndBusyTrue(cityId);
+        busyHumans.forEach(human -> human.setBusy(false));
+        humanRepository.saveAll(busyHumans);
     }
 
     private void updateHumanPositionCircular(Human human) {

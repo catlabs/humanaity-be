@@ -14,6 +14,7 @@ public class Human {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private boolean isBusy;
     private double happiness;
     private String job;
     private int age;
