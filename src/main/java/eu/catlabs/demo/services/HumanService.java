@@ -4,6 +4,7 @@ import eu.catlabs.demo.dto.HumanInput;
 import eu.catlabs.demo.dto.HumanOutput;
 import eu.catlabs.demo.entity.City;
 import eu.catlabs.demo.entity.Human;
+import eu.catlabs.demo.enums.Personality;
 import eu.catlabs.demo.repository.CityRepository;
 import eu.catlabs.demo.repository.HumanRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -44,6 +45,7 @@ public class HumanService {
         updateHumanFields(human, input);
         setHumanCity(human, input.getCityId());
         Human savedHuman = humanRepository.save(human);
+        System.out.println(savedHuman);
 
         // Publish the new human to subscribers
         // publishHumanUpdate(savedHuman);
@@ -56,8 +58,11 @@ public class HumanService {
         output.setId(human.getId());
         output.setBusy(human.isBusy());
         output.setName(human.getName());
-        output.setJob(human.getJob());
-        output.setHappiness(human.getHappiness());
+        output.setCreativity(human.getCreativity());
+        output.setIntellect(human.getIntellect());
+        output.setSociability(human.getSociability());
+        output.setPracticality(human.getPracticality());
+        output.setPersonality(human.getPersonality());
         output.setY(human.getY());
         output.setX(human.getX());
         return output;
@@ -89,14 +94,19 @@ public class HumanService {
 
     private void updateHumanFields(Human human, HumanInput input) {
         human.setName(input.getName());
-        human.setAge(input.getAge());
-        human.setJob(input.getJob());
-        human.setHappiness(input.getHappiness());
+        human.setBusy(input.isBusy());
+        human.setCreativity(input.getCreativity());
+        human.setIntellect(input.getIntellect());
+        human.setSociability(input.getSociability());
+        human.setPracticality(input.getPracticality());
+        human.setPersonality(derivePersonality(input.getCreativity(), input.getIntellect(), input.getSociability(), input.getPracticality()));
+        human.setX(input.getX());
+        human.setY(input.getY());
     }
 
-    private void setHumanCity(Human human, String cityId) {
+    private void setHumanCity(Human human, Long cityId) {
         if (cityId != null) {
-            Optional<City> city = cityRepository.findById(Long.parseLong(cityId));
+            Optional<City> city = cityRepository.findById(cityId);
             city.ifPresent(human::setCity);
         }
     }
@@ -119,6 +129,17 @@ public class HumanService {
 
     public void removeHumanFromSubscriptions(Long humanId) {
         lastPositions.remove(humanId);
+    }
+
+    public Personality derivePersonality(double creativity, double intellect, double sociability, double practicality) {
+        if (creativity > 0.5 && intellect > 0.5) return Personality.VISIONARY;
+        if (practicality > 0.5 && intellect > 0.5) return Personality.ENGINEER;
+        if (creativity > 0.5 && sociability > 0.5) return Personality.STORYTELLER;
+        if (sociability > 0.5 && practicality > 0.5) return Personality.LEADER;
+        if (intellect > 0.5 && sociability < 0.5) return Personality.THINKER;
+        if (creativity > 0.5 && practicality < 0.5) return Personality.DREAMER;
+
+        return Personality.BALANCED;
     }
 
 

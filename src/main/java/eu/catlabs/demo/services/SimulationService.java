@@ -121,10 +121,6 @@ public class SimulationService {
 
         human.setX(newX);
         human.setY(newY);
-
-        double happinessChange = (random.nextDouble() - 0.5) * 0.1;
-        double newHappiness = Math.max(0, Math.min(1, human.getHappiness() + happinessChange));
-        human.setHappiness(newHappiness);
     }
 
     public void resetBusyStatus(Long cityId) {

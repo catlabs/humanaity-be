@@ -26,20 +26,20 @@ type Subscription {
 
 type Human {
     id: ID!
-    age: Int
+    busy: Boolean!
     city: City
-    happiness: Float!
-    job: String
     name: String
+    creativity: Float!
+    intellect: Float!
+    sociability: Float!
+    practicality: Float!
+    personality: String!
     x: Float!
     y: Float!
 }
 
 input HumanInput {
-    age: Int!
     cityId: ID!
-    happiness: Float!
-    job: String
     name: String!
     x: Float!
     y: Float!

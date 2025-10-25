@@ -1,16 +1,30 @@
 package eu.catlabs.demo.dto;
 
+import eu.catlabs.demo.enums.Personality;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 public class HumanOutput {
-    boolean isBusy;
     private Long id;
+    private boolean isBusy;
     private String name;
-    private String job;
-    private double happiness;
-    private double x;
-    private double y;
+
+    private Double x;
+    private Double y;
+
+    private Double creativity;
+    private Double intellect;
+    private Double sociability;
+    private Double practicality;
+    private Personality personality;
+
+    private Double scienceSkill;
+    private Double cultureSkill;
+    private Double socialSkill;
+
+    private Double totalScienceContributed;
+    private Double totalCultureContributed;
+    private Double totalSocialContributed;
 }
