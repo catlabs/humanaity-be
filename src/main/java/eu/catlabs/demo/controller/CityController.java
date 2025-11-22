@@ -5,6 +5,7 @@ import eu.catlabs.demo.dto.CityOutput;
 import eu.catlabs.demo.entity.City;
 import eu.catlabs.demo.services.CityService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/cities")
 @Tag(name = "Cities", description = "City management API")
+@SecurityRequirement(name = "bearer-jwt")
 public class CityController {
     private final CityService cityService;
 

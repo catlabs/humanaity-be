@@ -13,6 +13,8 @@ public class OpenApiConfig {
 
     @Bean
     public OpenAPI customOpenAPI() {
+        final String securitySchemeName = "bearer-jwt";
+        
         return new OpenAPI()
                 .info(new Info()
                         .title("Humanaity API")
@@ -21,13 +23,12 @@ public class OpenApiConfig {
                         .contact(new Contact()
                                 .name("API Support")))
                 .components(new Components()
-                        .addSecuritySchemes("bearer-jwt",
+                        .addSecuritySchemes(securitySchemeName,
                                 new SecurityScheme()
                                         .type(SecurityScheme.Type.HTTP)
                                         .scheme("bearer")
                                         .bearerFormat("JWT")
-                                        .in(SecurityScheme.In.HEADER)
-                                        .name("Authorization")));
+                                        .description("Enter your JWT token. Get it from /auth/login endpoint.")));
     }
 }
 

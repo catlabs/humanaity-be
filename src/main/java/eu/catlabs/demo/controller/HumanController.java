@@ -4,6 +4,7 @@ import eu.catlabs.demo.dto.HumanInput;
 import eu.catlabs.demo.dto.HumanOutput;
 import eu.catlabs.demo.services.HumanService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/humans")
 @Tag(name = "Humans", description = "Human management API")
+@SecurityRequirement(name = "bearer-jwt")
 public class HumanController {
 
     private final HumanService humanService;

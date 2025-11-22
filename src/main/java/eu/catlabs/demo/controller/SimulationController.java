@@ -2,6 +2,7 @@ package eu.catlabs.demo.controller;
 
 import eu.catlabs.demo.services.SimulationService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +12,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/simulations")
 @Tag(name = "Simulations", description = "Simulation management API")
+@SecurityRequirement(name = "bearer-jwt")
 public class SimulationController {
 
     private final SimulationService simulationService;
