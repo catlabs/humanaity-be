@@ -56,8 +56,5 @@ public class DataLoader implements CommandLineRunner {
                 this.humanService.createHuman(humanInput);
             });
         }
-
     }
-
-
 }
