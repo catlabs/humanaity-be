@@ -3,19 +3,19 @@ package eu.catlabs.demo.controller;
 import eu.catlabs.demo.dto.HumanInput;
 import eu.catlabs.demo.dto.HumanOutput;
 import eu.catlabs.demo.services.HumanService;
-import org.reactivestreams.Publisher;
-import org.springframework.graphql.data.method.annotation.Argument;
-import org.springframework.graphql.data.method.annotation.MutationMapping;
-import org.springframework.graphql.data.method.annotation.QueryMapping;
-import org.springframework.graphql.data.method.annotation.SubscriptionMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/humans")
+@Tag(name = "Humans", description = "Human management API")
 public class HumanController {
 
     private final HumanService humanService;
@@ -24,34 +24,43 @@ public class HumanController {
         this.humanService = humanService;
     }
 
-    @QueryMapping
-    public Optional<HumanOutput> human(@Argument String id) {
-        return humanService.getHumanById(Long.parseLong(id));
+    @GetMapping("/{id}")
+    @Operation(summary = "Get human by ID")
+    public ResponseEntity<HumanOutput> getHumanById(@PathVariable Long id) {
+        Optional<HumanOutput> human = humanService.getHumanById(id);
+        return human.map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    @QueryMapping
-    public List<HumanOutput> humansByCity(@Argument String cityId) {
-        return humanService.getHumansByCityId(cityId);
+    @GetMapping("/city/{cityId}")
+    @Operation(summary = "Get all humans in a city")
+    public ResponseEntity<List<HumanOutput>> getHumansByCity(@PathVariable String cityId) {
+        List<HumanOutput> humans = humanService.getHumansByCityId(cityId);
+        return ResponseEntity.ok(humans);
     }
 
-    @MutationMapping
-    public HumanOutput createHuman(@Argument HumanInput input) {
-        return humanService.createHuman(input);
+    @PostMapping
+    @Operation(summary = "Create a new human")
+    public ResponseEntity<HumanOutput> createHuman(@Valid @RequestBody HumanInput input) {
+        HumanOutput human = humanService.createHuman(input);
+        return ResponseEntity.status(HttpStatus.CREATED).body(human);
     }
 
-    @MutationMapping
-    public HumanOutput updateHuman(@Argument String id, @Argument HumanInput input) {
-        return humanService.updateHuman(id, input);
+    @PutMapping("/{id}")
+    @Operation(summary = "Update a human")
+    public ResponseEntity<HumanOutput> updateHuman(@PathVariable String id, @Valid @RequestBody HumanInput input) {
+        try {
+            HumanOutput human = humanService.updateHuman(id, input);
+            return ResponseEntity.ok(human);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
-    @MutationMapping
-    public Boolean deleteHuman(@Argument String id) {
-        return humanService.deleteHuman(Long.parseLong(id));
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete a human")
+    public ResponseEntity<Void> deleteHuman(@PathVariable Long id) {
+        boolean deleted = humanService.deleteHuman(id);
+        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
-
-    @SubscriptionMapping
-    public Publisher<List<HumanOutput>> humansByCityPositions(@Argument String cityId) {
-        return humanService.getCityPositionsStream(Long.parseLong(cityId));
-    }
-
 }

@@ -3,7 +3,6 @@ package eu.catlabs.demo.services;
 import eu.catlabs.demo.dto.CityInput;
 import eu.catlabs.demo.entity.City;
 import eu.catlabs.demo.repository.CityRepository;
-import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,7 +24,7 @@ public class CityService {
         return cityRepository.findById(Long.parseLong(id));
     }
 
-    public List<City> getCitiesByName(@Argument String name) {
+    public List<City> getCitiesByName(String name) {
         return cityRepository.findByNameContainingIgnoreCase(name);
     }
 

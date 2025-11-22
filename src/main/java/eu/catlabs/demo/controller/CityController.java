@@ -1,19 +1,22 @@
 package eu.catlabs.demo.controller;
 
 import eu.catlabs.demo.dto.CityInput;
+import eu.catlabs.demo.dto.CityOutput;
 import eu.catlabs.demo.entity.City;
 import eu.catlabs.demo.services.CityService;
-import org.springframework.graphql.data.method.annotation.Argument;
-import org.springframework.graphql.data.method.annotation.MutationMapping;
-import org.springframework.graphql.data.method.annotation.QueryMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/cities")
+@Tag(name = "Cities", description = "City management API")
 public class CityController {
     private final CityService cityService;
 
@@ -21,38 +24,70 @@ public class CityController {
         this.cityService = cityService;
     }
 
-    @QueryMapping
-    public List<City> cities() {
-        return cityService.getAllCities();
+    @GetMapping
+    @Operation(summary = "Get all cities")
+    public ResponseEntity<List<CityOutput>> getAllCities() {
+        List<City> cities = cityService.getAllCities();
+        List<CityOutput> outputs = cities.stream()
+                .map(this::toCityOutput)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(outputs);
     }
 
-    @QueryMapping
-    public List<City> citiesByName(@Argument String name) {
-        return cityService.getCitiesByName(name);
+    @GetMapping("/{id}")
+    @Operation(summary = "Get city by ID")
+    public ResponseEntity<CityOutput> getCityById(@PathVariable String id) {
+        return cityService.getCityById(id)
+                .map(this::toCityOutput)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    @QueryMapping
-    public Optional<City> city(@Argument String id) {
-        return cityService.getCityById(id);
+    @GetMapping("/search")
+    @Operation(summary = "Search cities by name")
+    public ResponseEntity<List<CityOutput>> getCitiesByName(@RequestParam String name) {
+        List<City> cities = cityService.getCitiesByName(name);
+        List<CityOutput> outputs = cities.stream()
+                .map(this::toCityOutput)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(outputs);
     }
 
-    @MutationMapping
-    public City createCity(@Argument CityInput input) {
-        return cityService.createCity(input);
+    @PostMapping
+    @Operation(summary = "Create a new city")
+    public ResponseEntity<CityOutput> createCity(@Valid @RequestBody CityInput input) {
+        City city = cityService.createCity(input);
+        return ResponseEntity.status(HttpStatus.CREATED).body(toCityOutput(city));
     }
 
-    @MutationMapping
-    public City updateCity(@Argument String id, @Argument CityInput input) {
-        return cityService.updateCity(id, input);
+    @PutMapping("/{id}")
+    @Operation(summary = "Update a city")
+    public ResponseEntity<CityOutput> updateCity(@PathVariable String id, @Valid @RequestBody CityInput input) {
+        try {
+            City city = cityService.updateCity(id, input);
+            return ResponseEntity.ok(toCityOutput(city));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
-    @MutationMapping
-    public Boolean deleteCity(@Argument String id) {
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete a city")
+    public ResponseEntity<Void> deleteCity(@PathVariable String id) {
         try {
             cityService.deleteCity(Long.parseLong(id));
-            return true;
+            return ResponseEntity.noContent().build();
         } catch (Exception e) {
-            return false;
+            return ResponseEntity.notFound().build();
         }
+    }
+
+    private CityOutput toCityOutput(City city) {
+        CityOutput output = new CityOutput();
+        output.setId(city.getId());
+        output.setName(city.getName());
+        // Humans will be loaded separately if needed via /api/humans/city/{cityId}
+        output.setHumans(null);
+        return output;
     }
 }
