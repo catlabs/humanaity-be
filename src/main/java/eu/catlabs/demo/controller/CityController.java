@@ -3,12 +3,16 @@ package eu.catlabs.demo.controller;
 import eu.catlabs.demo.dto.CityInput;
 import eu.catlabs.demo.dto.CityOutput;
 import eu.catlabs.demo.entity.City;
+import eu.catlabs.demo.entity.User;
+import eu.catlabs.demo.repository.UserRepository;
 import eu.catlabs.demo.services.CityService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,17 +21,48 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/cities")
 @Tag(name = "Cities", description = "City management API")
+@SecurityRequirement(name = "bearer-jwt")
 public class CityController {
     private final CityService cityService;
+    private final UserRepository userRepository;
 
-    public CityController(CityService cityService) {
+    public CityController(CityService cityService, UserRepository userRepository) {
         this.cityService = cityService;
+        this.userRepository = userRepository;
     }
 
     @GetMapping
     @Operation(summary = "Get all cities")
     public ResponseEntity<List<CityOutput>> getAllCities() {
         List<City> cities = cityService.getAllCities();
+        List<CityOutput> outputs = cities.stream()
+                .map(this::toCityOutput)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(outputs);
+    }
+
+    @GetMapping("/mine")
+    @Operation(summary = "Get all cities owned by the current user")
+    public ResponseEntity<List<CityOutput>> getMyCities(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String email = authentication.getName();
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalStateException("User not found: " + email));
+
+        List<City> cities = cityService.getCitiesForUser(currentUser);
+        List<CityOutput> outputs = cities.stream()
+                .map(this::toCityOutput)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(outputs);
+    }
+
+    @GetMapping("/search")
+    @Operation(summary = "Search cities by name")
+    public ResponseEntity<List<CityOutput>> getCitiesByName(@RequestParam String name) {
+        List<City> cities = cityService.getCitiesByName(name);
         List<CityOutput> outputs = cities.stream()
                 .map(this::toCityOutput)
                 .collect(Collectors.toList());
@@ -43,20 +78,18 @@ public class CityController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/search")
-    @Operation(summary = "Search cities by name")
-    public ResponseEntity<List<CityOutput>> getCitiesByName(@RequestParam String name) {
-        List<City> cities = cityService.getCitiesByName(name);
-        List<CityOutput> outputs = cities.stream()
-                .map(this::toCityOutput)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(outputs);
-    }
-
     @PostMapping
     @Operation(summary = "Create a new city")
-    public ResponseEntity<CityOutput> createCity(@Valid @RequestBody CityInput input) {
-        City city = cityService.createCity(input);
+    public ResponseEntity<CityOutput> createCity(@Valid @RequestBody CityInput input, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String email = authentication.getName();
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalStateException("User not found: " + email));
+
+        City city = cityService.createCityForUser(input, currentUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(toCityOutput(city));
     }
 
