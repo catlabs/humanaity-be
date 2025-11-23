@@ -3,7 +3,9 @@ package eu.catlabs.demo.controller;
 import eu.catlabs.demo.dto.CityInput;
 import eu.catlabs.demo.dto.CityOutput;
 import eu.catlabs.demo.entity.City;
+import eu.catlabs.demo.services.CityFactoryService;
 import eu.catlabs.demo.services.CityService;
+import eu.catlabs.demo.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -19,9 +21,13 @@ import java.util.stream.Collectors;
 @Tag(name = "Cities", description = "City management API")
 public class CityController {
     private final CityService cityService;
+    private final CityFactoryService cityFactoryService;
+    private final UserService userService;
 
-    public CityController(CityService cityService) {
+    public CityController(CityService cityService, CityFactoryService cityFactoryService, UserService userService) {
         this.cityService = cityService;
+        this.cityFactoryService = cityFactoryService;
+        this.userService = userService;
     }
 
     @GetMapping
@@ -54,10 +60,21 @@ public class CityController {
     }
 
     @PostMapping
-    @Operation(summary = "Create a new city")
+    @Operation(summary = "Create a new city with generated humans")
     public ResponseEntity<CityOutput> createCity(@Valid @RequestBody CityInput input) {
-        City city = cityService.createCity(input);
+        var currentUser = userService.getCurrentUserOrThrow();
+        City city = cityFactoryService.createCityForUser(input, currentUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(toCityOutput(city));
+    }
+
+    @GetMapping("/mine")
+    @Operation(summary = "Get all cities owned by the current user")
+    public ResponseEntity<List<CityOutput>> getMyCities() {
+        List<City> cities = cityService.getCitiesForCurrentUser();
+        List<CityOutput> outputs = cities.stream()
+                .map(this::toCityOutput)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(outputs);
     }
 
     @PutMapping("/{id}")
