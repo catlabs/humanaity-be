@@ -2,6 +2,7 @@ package eu.catlabs.demo.services;
 
 import eu.catlabs.demo.dto.CityInput;
 import eu.catlabs.demo.entity.City;
+import eu.catlabs.demo.entity.User;
 import eu.catlabs.demo.repository.CityRepository;
 import org.springframework.stereotype.Service;
 
@@ -48,5 +49,9 @@ public class CityService {
 
     public void deleteCity(Long id) {
         cityRepository.deleteById(id);
+    }
+
+    public List<City> getCitiesForUser(User user) {
+        return cityRepository.findByOwner(user);
     }
 }

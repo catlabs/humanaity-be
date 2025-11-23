@@ -90,7 +90,6 @@ public class AiService {
                 .content();
         String cleanJson = extractJsonFromResponse(response);
         JsonNode jsonNode = objectMapper.readTree(cleanJson);
-        System.out.println(jsonNode);
 
         return jsonNode;
     }
