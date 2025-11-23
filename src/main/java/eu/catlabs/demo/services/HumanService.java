@@ -45,13 +45,6 @@ public class HumanService {
         updateHumanFields(human, input);
         setHumanCity(human, input.getCityId());
         Human savedHuman = humanRepository.save(human);
-        
-        // Log only the ID to avoid lazy loading issues
-        // System.out.println("Created human with ID: " + savedHuman.getId());
-
-        // Publish the new human to subscribers
-        // publishHumanUpdate(savedHuman);
-
         return toHumanOutput(savedHuman);
     }
 
@@ -77,9 +70,6 @@ public class HumanService {
         updateHumanFields(human, input);
         setHumanCity(human, input.getCityId());
         Human updatedHuman = humanRepository.save(human);
-
-        // Publish the update to subscribers
-        // publishHumanUpdate(updatedHuman);
         return toHumanOutput(updatedHuman);
     }
 

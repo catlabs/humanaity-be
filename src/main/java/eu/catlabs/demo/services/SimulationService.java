@@ -83,7 +83,7 @@ public class SimulationService {
             this.humanService.publishHumanUpdates(randomHumans);
 
         } catch (Exception e) {
-            System.err.println("Error simulating city " + cityId + ": " + e.getMessage());
+            logger.error("Error simulating city {}: {}", cityId, e.getMessage(), e);
         }
     }
 
@@ -99,9 +99,7 @@ public class SimulationService {
 
                 changedHumans.add(currentHuman);
                 changedHumans.add(otherHuman);
-
-                // handleCollision(currentHuman, otherHuman);
-                return true; // Had collision
+                return true;
             }
         }
         return false; // No collision
@@ -126,36 +124,4 @@ public class SimulationService {
         human.setY(newY);
     }
 
-    public void resetBusyStatus(Long cityId) {
-        List<Human> busyHumans = humanRepository.findByCityIdAndBusyTrue(cityId);
-        busyHumans.forEach(human -> human.setBusy(false));
-        humanRepository.saveAll(busyHumans);
-    }
-
-    private void updateHumanPositionCircular(Human human) {
-        double angle = random.nextDouble() * 2 * Math.PI;
-        double radius = 0.02;
-        double newX = Math.max(0, Math.min(1, human.getX() + Math.cos(angle) * radius));
-        double newY = Math.max(0, Math.min(1, human.getY() + Math.sin(angle) * radius));
-        human.setX(newX);
-        human.setY(newY);
-    }
-
-    // Directed movement (toward center or specific point)
-    private void updateHumanPositionDirected(Human human) {
-        double targetX = 0.5; // center
-        double targetY = 0.5; // center
-        double speed = 0.01;
-
-        double dx = targetX - human.getX();
-        double dy = targetY - human.getY();
-        double distance = Math.sqrt(dx * dx + dy * dy);
-
-        if (distance > 0) {
-            double newX = human.getX() + (dx / distance) * speed;
-            double newY = human.getY() + (dy / distance) * speed;
-            human.setX(Math.max(0, Math.min(1, newX)));
-            human.setY(Math.max(0, Math.min(1, newY)));
-        }
-    }
 }

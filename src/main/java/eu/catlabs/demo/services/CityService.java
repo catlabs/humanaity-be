@@ -29,12 +29,6 @@ public class CityService {
         return cityRepository.findByNameContainingIgnoreCase(name);
     }
 
-    public City createCity(CityInput input) {
-        City city = new City();
-        city.setName(input.getName());
-        return cityRepository.save(city);
-    }
-
     public City createCityForUser(CityInput input, User owner) {
         if (owner == null) {
             throw new IllegalArgumentException("Owner cannot be null");
