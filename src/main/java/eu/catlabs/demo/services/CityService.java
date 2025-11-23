@@ -12,11 +12,9 @@ import java.util.Optional;
 @Service
 public class CityService {
     private final CityRepository cityRepository;
-    private final UserService userService;
 
-    public CityService(CityRepository cityRepository, UserService userService) {
+    public CityService(CityRepository cityRepository) {
         this.cityRepository = cityRepository;
-        this.userService = userService;
     }
 
     public List<City> getAllCities() {
@@ -53,8 +51,7 @@ public class CityService {
         cityRepository.deleteById(id);
     }
 
-    public List<City> getCitiesForCurrentUser() {
-        User currentUser = userService.getCurrentUserOrThrow();
-        return cityRepository.findByOwner(currentUser);
+    public List<City> getCitiesForUser(User user) {
+        return cityRepository.findByOwner(user);
     }
 }
