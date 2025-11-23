@@ -2,6 +2,8 @@ package eu.catlabs.demo.services;
 
 import eu.catlabs.demo.entity.Human;
 import eu.catlabs.demo.repository.HumanRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -10,6 +12,7 @@ import java.util.concurrent.*;
 @Service
 public class SimulationService {
 
+    private static final Logger logger = LoggerFactory.getLogger(SimulationService.class);
     private static final double COLLISION_DISTANCE = 0.02;
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(4);
     private final Map<Long, ScheduledFuture<?>> runningTasks = new ConcurrentHashMap<>();
@@ -58,7 +61,7 @@ public class SimulationService {
             List<Human> randomHumans = allHumans.stream().limit(10).toList();
 
             if (randomHumans.isEmpty()) {
-                System.out.println("No humans found in city " + cityId);
+                logger.debug("No humans found in city {}", cityId);
                 return;
             }
 

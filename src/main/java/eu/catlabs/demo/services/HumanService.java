@@ -45,7 +45,9 @@ public class HumanService {
         updateHumanFields(human, input);
         setHumanCity(human, input.getCityId());
         Human savedHuman = humanRepository.save(human);
-        System.out.println(savedHuman);
+        
+        // Log only the ID to avoid lazy loading issues
+        // System.out.println("Created human with ID: " + savedHuman.getId());
 
         // Publish the new human to subscribers
         // publishHumanUpdate(savedHuman);
@@ -107,7 +109,11 @@ public class HumanService {
     private void setHumanCity(Human human, Long cityId) {
         if (cityId != null) {
             Optional<City> city = cityRepository.findById(cityId);
-            city.ifPresent(human::setCity);
+            if (city.isPresent()) {
+                human.setCity(city.get());
+            } else {
+                throw new IllegalArgumentException("City not found with id: " + cityId);
+            }
         }
     }
 

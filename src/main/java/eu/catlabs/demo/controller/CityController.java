@@ -5,6 +5,7 @@ import eu.catlabs.demo.dto.CityOutput;
 import eu.catlabs.demo.entity.City;
 import eu.catlabs.demo.entity.User;
 import eu.catlabs.demo.repository.UserRepository;
+import eu.catlabs.demo.services.CityFactoryService;
 import eu.catlabs.demo.services.CityService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -24,10 +25,12 @@ import java.util.stream.Collectors;
 @SecurityRequirement(name = "bearer-jwt")
 public class CityController {
     private final CityService cityService;
+    private final CityFactoryService cityFactoryService;
     private final UserRepository userRepository;
 
-    public CityController(CityService cityService, UserRepository userRepository) {
+    public CityController(CityService cityService, CityFactoryService cityFactoryService, UserRepository userRepository) {
         this.cityService = cityService;
+        this.cityFactoryService = cityFactoryService;
         this.userRepository = userRepository;
     }
 
@@ -79,7 +82,7 @@ public class CityController {
     }
 
     @PostMapping
-    @Operation(summary = "Create a new city")
+    @Operation(summary = "Create a new city with generated humans")
     public ResponseEntity<CityOutput> createCity(@Valid @RequestBody CityInput input, Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -89,7 +92,7 @@ public class CityController {
         User currentUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalStateException("User not found: " + email));
 
-        City city = cityService.createCityForUser(input, currentUser);
+        City city = cityFactoryService.createCityForUser(input, currentUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(toCityOutput(city));
     }
 
