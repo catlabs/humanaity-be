@@ -4,6 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
+import eu.catlabs.demo.ai.application.AiGenerationService;
+import eu.catlabs.demo.ai.application.prompt.HumanGenerationPrompt;
+import eu.catlabs.demo.ai.domain.AiPrompt;
+import eu.catlabs.demo.ai.domain.AiResponse;
+import eu.catlabs.demo.ai.infrastructure.port.AiServiceException;
 import eu.catlabs.demo.dto.HumanInput;
 import eu.catlabs.demo.entity.City;
 import org.slf4j.Logger;
@@ -23,14 +28,18 @@ public class HumanGenerationService {
 
     private static final Logger logger = LoggerFactory.getLogger(HumanGenerationService.class);
 
-    private final AiService aiService;
+    private final AiGenerationService aiGenerationService;
+    private final HumanGenerationPrompt promptBuilder;
     private final HumanService humanService;
     private final Faker faker = new Faker(new Locale("en"));
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Random random = new Random();
 
-    public HumanGenerationService(AiService aiService, HumanService humanService) {
-        this.aiService = aiService;
+    public HumanGenerationService(AiGenerationService aiGenerationService,
+                                  HumanGenerationPrompt promptBuilder,
+                                  HumanService humanService) {
+        this.aiGenerationService = aiGenerationService;
+        this.promptBuilder = promptBuilder;
         this.humanService = humanService;
     }
 
@@ -105,9 +114,24 @@ public class HumanGenerationService {
     private JsonNode generateHumansWithAiAsync() throws Exception {
         CompletableFuture<JsonNode> future = CompletableFuture.supplyAsync(() -> {
             try {
-                return aiService.createHumans();
+                // Build the prompt using the prompt builder
+                AiPrompt prompt = promptBuilder.createHumanGenerationPrompt();
+                
+                // Call the AI generation service
+                AiResponse response = aiGenerationService.generate(prompt);
+                
+                // Extract JSON content from response
+                JsonNode jsonContent = response.getJsonContent();
+                if (jsonContent == null && response.getRawContent() != null) {
+                    // Fallback: try to parse raw content
+                    jsonContent = objectMapper.readTree(response.getRawContent());
+                }
+                
+                return jsonContent;
+            } catch (AiServiceException e) {
+                throw new RuntimeException("AI service error: " + e.getMessage(), e);
             } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("JSON parsing error: " + e.getMessage(), e);
             }
         });
         
