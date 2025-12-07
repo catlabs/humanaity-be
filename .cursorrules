@@ -1,0 +1,13 @@
+# Cursor Rules for Humanaity Backend
+
+## Best Practices Location
+
+When generating commit messages or following best practices, **ALWAYS** read and follow the guidelines from:
+- `docs/best-practices/COMMIT_BEST_PRACTICES.md`
+
+When asked about commit message format, coding standards, or best practices:
+1. First check the `docs/best-practices/` folder
+2. Read the relevant best practices file(s)
+3. Apply those guidelines contextually
+
+The best practices files contain all the detailed rules and examples. This file is just a pointer to where those guidelines are located.
