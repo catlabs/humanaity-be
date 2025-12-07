@@ -8,11 +8,11 @@
         <version>3.5.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>eu.catlabs.demo</groupId>
-    <artifactId>demo</artifactId>
+    <groupId>eu.catlabs.humanaity</groupId>
+    <artifactId>humanaity</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>demo</name>
-    <description>demo</description>
+    <name>humanaity</name>
+    <description>humanaity</description>
     <url/>
     <licenses>
         <license/>

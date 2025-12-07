@@ -48,7 +48,7 @@ Use scopes to indicate the area of the codebase affected. **Scopes are flexible 
 1. **Feature/Module Scopes**: Use the name of the feature module or domain area
    - Examples: `auth`, `city`, `human`, `simulation`, `ai`
    - **New features automatically get their own scope** - just use the module/package name
-   - Look at your package structure: `eu.catlabs.demo.<module>` → scope is `<module>`
+   - Look at your package structure: `eu.catlabs.humanaity.<module>` → scope is `<module>`
 
 2. **Technical Scopes**: Use when the change affects a technical layer across modules
    - Examples: `api`, `service`, `entity`, `dto`, `repository`, `config`, `security`

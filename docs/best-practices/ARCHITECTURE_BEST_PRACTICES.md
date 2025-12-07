@@ -283,10 +283,10 @@ public class CityOutput {
 
 ```java
 // city/domain/City.java
-import eu.catlabs.demo.auth.domain.User;  // ✅ OK - domain to domain
+import eu.catlabs.humanaity.auth.domain.User;  // ✅ OK - domain to domain
 
 // city/application/CityApplicationService.java
-import eu.catlabs.demo.auth.infrastructure.persistence.UserRepository;  // ✅ OK - infrastructure to infrastructure (same module or common)
+import eu.catlabs.humanaity.auth.infrastructure.persistence.UserRepository;  // ✅ OK - infrastructure to infrastructure (same module or common)
 ```
 
 ## Infrastructure
@@ -310,11 +310,11 @@ Global exception handler in `common/exception/GlobalExceptionHandler.java`:
 
 ### Package Naming
 
-- Module: `eu.catlabs.demo.{module}`
-- API: `eu.catlabs.demo.{module}.api`
-- Application: `eu.catlabs.demo.{module}.application`
-- Domain: `eu.catlabs.demo.{module}.domain`
-- Infrastructure: `eu.catlabs.demo.{module}.infrastructure`
+- Module: `eu.catlabs.humanaity.{module}`
+- API: `eu.catlabs.humanaity.{module}.api`
+- Application: `eu.catlabs.humanaity.{module}.application`
+- Domain: `eu.catlabs.humanaity.{module}.domain`
+- Infrastructure: `eu.catlabs.humanaity.{module}.infrastructure`
 
 ### Annotations
 
