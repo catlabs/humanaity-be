@@ -70,6 +70,13 @@ These are just examples - your project may have different modules:
 feat(city): add city search by name endpoint
 ```
 
+### Simple Change (No Body Needed)
+```
+docs: add architecture best practices guide
+```
+
+**Note**: For simple changes (adding a file, small fixes, documentation), the subject line is sufficient. Only add a body for complex changes that need context.
+
 ### Feature with Scope
 ```
 feat(ai): implement OpenAI adapter for human generation
@@ -114,9 +121,11 @@ config: update application properties for production
 ## Best Practices
 
 1. **Be specific**: Instead of "fix bug", use "fix(auth): resolve null pointer in token validation"
-2. **One logical change per commit**: Don't mix unrelated changes
-3. **Reference issues**: Use `Closes #123` or `Fixes #456` in footer when applicable
-4. **Explain why, not what**: The code shows what changed; the commit message should explain why
+2. **Keep it concise**: For simple changes, the subject line is often enough. Only add body for complex changes or when context is needed
+3. **One logical change per commit**: Don't mix unrelated changes
+4. **Reference issues**: Use `Closes #123` or `Fixes #456` in footer when applicable
+5. **Explain why, not what**: The code shows what changed; the commit message should explain why
+6. **Avoid over-detailing**: Don't list every file changed. Focus on what was accomplished, not implementation details
 
 ## Common Patterns
 
