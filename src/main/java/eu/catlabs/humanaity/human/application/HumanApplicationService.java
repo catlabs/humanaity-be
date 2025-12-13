@@ -8,11 +8,13 @@ import eu.catlabs.humanaity.human.infrastructure.persistence.HumanRepository;
 import eu.catlabs.humanaity.city.domain.City;
 import eu.catlabs.humanaity.city.infrastructure.persistence.CityRepository;
 import jakarta.persistence.EntityNotFoundException;
-import org.reactivestreams.Publisher;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.time.Duration;
+import java.io.IOException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -116,16 +118,28 @@ public class HumanApplicationService {
         humans.forEach(human -> lastPositions.put(human.getId(), human));
     }
 
-    public Publisher<List<HumanOutput>> getCityPositionsStream(Long cityId) {
-        return Flux.interval(Duration.ofMillis(100))
-                .map(tick -> {
-                    List<HumanOutput> changes = lastPositions.values().stream()
-                            .filter(human -> human.getCity() != null && human.getCity().getId().equals(cityId))
-                            .map(this::toHumanOutput)
-                            .toList();
-                    lastPositions.clear();
-                    return changes;
-                });
+    public SseEmitter getCityPositionsStream(Long cityId) {
+        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+        
+        executor.scheduleAtFixedRate(() -> {
+            try {
+                List<HumanOutput> changes = lastPositions.values().stream()
+                        .filter(human -> human.getCity() != null && human.getCity().getId().equals(cityId))
+                        .map(this::toHumanOutput)
+                        .toList();
+                lastPositions.clear();
+                emitter.send(SseEmitter.event().data(changes));
+            } catch (IOException e) {
+                emitter.completeWithError(e);
+                executor.shutdown();
+            }
+        }, 0, 100, TimeUnit.MILLISECONDS);
+        
+        emitter.onCompletion(() -> executor.shutdown());
+        emitter.onTimeout(() -> executor.shutdown());
+        
+        return emitter;
     }
 
     public void removeHumanFromSubscriptions(Long humanId) {

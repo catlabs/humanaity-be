@@ -1,113 +1,79 @@
 # Humanaity Backend
 
-Backend Spring Boot implémentant un système d'authentification JWT complet avec architecture réactive et sécurité moderne.
+Spring Boot 3.5 REST API that manages cities and their humans, secures access with JWT (access + refresh tokens), and can generate inhabitants through OpenAI (with a Faker fallback when AI is unavailable).
 
-## Stack Technique
+## Tech Stack
+- Java 17, Spring Boot 3.5 (web MVC)
+- Spring Security (stateless JWT with `OncePerRequestFilter`)
+- Spring Data JPA + H2 file database
+- Springdoc OpenAPI 3 (`/swagger-ui.html`)
+- Spring AI (OpenAI ChatClient) + Java Faker fallback
+- Lombok for boilerplate reduction
 
-- **Spring Boot 3.5.0** (Java 17)
-- **Spring Security WebFlux** - Architecture réactive et non-bloquante
-- **Spring Data JPA** - Accès aux données avec Hibernate
-- **JWT (JJWT 0.12.5)** - Tokens stateless pour l'authentification
-- **BCrypt** - Hashing sécurisé des mots de passe
-- **H2 Database** - Base de données embarquée
-- **Lombok** - Réduction du code boilerplate
-- **GraphQL** - API GraphQL avec WebSocket
-- **Spring AI** - Intégration OpenAI
+## What the API Does
+- **Auth**: signup, login, refresh, logout; passwords hashed with BCrypt; refresh tokens persisted and rotated.
+- **Cities**: CRUD with ownership; city creation auto-generates humans using AI (or Faker fallback).
+- **Humans**: CRUD with traits (creativity, intellect, sociability, practicality), positions, and personality derivation.
+- **Simulation**: background scheduler that moves humans, detects collisions, and persists updates; start/stop/status per city.
+- **Docs & tooling**: OpenAPI/Swagger UI enabled; H2 console exposed for local debugging.
 
-## Fonctionnalités d'Authentification
+## API Surface (summary)
+- Auth (public):  
+  - `POST /auth/signup`  
+  - `POST /auth/login`  
+  - `POST /auth/refresh`  
+  - `POST /auth/logout`
+- Cities (JWT required except where noted):  
+  - `GET /api/cities`  
+  - `GET /api/cities/mine`  
+  - `GET /api/cities/search?name=foo`  
+  - `GET /api/cities/{id}`  
+  - `POST /api/cities` (creates city + generates humans)  
+  - `PUT /api/cities/{id}`  
+  - `DELETE /api/cities/{id}`
+- Humans (JWT):  
+  - `GET /api/humans/{id}`  
+  - `GET /api/humans/city/{cityId}`  
+  - `POST /api/humans`  
+  - `PUT /api/humans/{id}`  
+  - `DELETE /api/humans/{id}`
+- Simulation (JWT):  
+  - `POST /api/simulations/{cityId}/start`  
+  - `POST /api/simulations/{cityId}/stop`  
+  - `GET /api/simulations/{cityId}/status`
 
-### Endpoints REST
-
-- `POST /auth/signup` - Création de compte avec validation
-- `POST /auth/login` - Connexion et génération de tokens
-- `POST /auth/refresh` - Rafraîchissement automatique des tokens
-- `POST /auth/logout` - Déconnexion et invalidation des tokens
-
-### Architecture de Sécurité
-
-**JWT Stateless**
-- Access tokens (15 minutes) - Tokens de courte durée pour les requêtes
-- Refresh tokens (7 jours) - Tokens de longue durée stockés en base
-- Validation de signature et expiration à chaque requête
-- Extraction sécurisée des claims (email, roles)
-
-**Spring Security WebFlux**
-- Filtre JWT personnalisé (`JwtAuthenticationWebFilter`)
-- Convertisseur d'authentification (`JwtServerAuthenticationConverter`)
-- Configuration réactive avec `ServerHttpSecurity`
-- Routes publiques `/auth/**` exemptées de l'authentification
-- Protection automatique de toutes les autres routes
-
-**Gestion des Mots de Passe**
-- Hashing avec BCrypt (10 rounds par défaut)
-- Validation côté serveur avant stockage
-- Vérification sécurisée lors du login (pas de comparaison en clair)
-
-## Architecture
-
-### Structure en Couches
-
-```
-Controller → Service → Repository → Entity
-```
-
-- **Controllers** (`@RestController`) - Points d'entrée REST, gestion des erreurs HTTP
-- **Services** (`@Service`) - Logique métier, transactions (`@Transactional`)
-- **Repositories** (`JpaRepository`) - Accès aux données, requêtes personnalisées
-- **Entities** (`@Entity`) - Modèle de données JPA avec relations
-
-### DTOs et Validation
-
-- `SignupRequest` - Validation email unique, confirmation de mot de passe
-- `AuthRequest` - Authentification avec email/password
-- `AuthResponse` - Retour des tokens (access + refresh)
-- Séparation claire entre couche présentation et modèle de données
-
-### Gestion Transactionnelle
-
-- `@Transactional` sur toutes les opérations modifiant la base
-- Rollback automatique en cas d'erreur
-- Isolation des opérations critiques (signup, login, refresh, logout)
-
-## Compétences Démontrées
-
-✅ **Sécurité Backend**
-- Implémentation complète JWT avec refresh tokens
-- Protection contre les attaques courantes (CSRF désactivé pour API stateless)
-- Hashing sécurisé des mots de passe (jamais stockés en clair)
-- Validation et sanitization des entrées
-
-✅ **Architecture Réactive**
-- Spring WebFlux pour la scalabilité
-- Filtres de sécurité non-bloquants
-- Gestion asynchrone des requêtes
-
-✅ **Bonnes Pratiques Spring**
-- Injection de dépendances (constructor injection)
-- Configuration externalisée (`application.properties`)
-- Séparation des responsabilités (SRP)
-- Gestion d'erreurs structurée
-
-✅ **Qualité de Code**
-- Code propre et maintenable
-- Transactions explicites
-- DTOs pour l'isolation des couches
-- Configuration CORS pour le frontend
+All `/api/**` routes expect `Authorization: Bearer <access_token>`.
 
 ## Configuration
-
+Key properties in `src/main/resources/application.properties`:
 ```properties
+# Database
+spring.datasource.url=jdbc:h2:file:./data/testdb;AUTO_SERVER=TRUE
+spring.jpa.hibernate.ddl-auto=update
+
+# Swagger / OpenAPI
+springdoc.api-docs.path=/v3/api-docs
+springdoc.swagger-ui.path=/swagger-ui.html
+
 # JWT
-jwt.secret=your-secret-key...
+jwt.secret=change-me-in-prod
 jwt.access-token-expiration=900000      # 15 minutes
-jwt.refresh-token-expiration=604800000  # 7 jours
+jwt.refresh-token-expiration=604800000  # 7 days
+
+# OpenAI (optional)
+spring.ai.openai.api-key=${OPENAI_API_KEY}
+spring.ai.openai.chat.options.model=gpt-4-turbo
 ```
 
-## Démarrage
-
+## Local Run
 ```bash
-mvn spring-boot:run
+cd humanaity-be
+./mvnw spring-boot:run
 ```
+Then open `http://localhost:8080/swagger-ui.html` for interactive docs.  
+H2 console: `http://localhost:8080/h2-console` (JDBC URL `jdbc:h2:file:./data/testdb`, user `sa`, empty password by default).
 
-L'API est accessible sur `http://localhost:8080`
-
+## Testing
+```bash
+./mvnw test
+```
