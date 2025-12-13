@@ -7,10 +7,16 @@ When working on this project, **ALWAYS** read and follow the guidelines from `do
 - **Commit Messages**: `docs/best-practices/COMMIT_BEST_PRACTICES.md`
 - **Architecture & Development**: `docs/best-practices/ARCHITECTURE_BEST_PRACTICES.md`
 
+## Mandatory: Read Before Suggesting
+
+Before suggesting anything (code changes, refactors, architecture decisions, styling guidance, commit messages, etc.), **read ALL files** in `docs/best-practices/` for this project and follow them.
+If you cannot access one of the files, explicitly state which one and proceed using the others.
+
 ## When to Read What
 
 **For commit messages:**
 - Read `COMMIT_BEST_PRACTICES.md` before generating commit messages
+- Before proposing commit messages, run `git status` and `git diff` to review ALL changes
 
 **For code changes, new features, or architecture questions:**
 - Read `ARCHITECTURE_BEST_PRACTICES.md` to understand:

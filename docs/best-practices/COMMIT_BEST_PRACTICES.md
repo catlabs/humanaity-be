@@ -122,11 +122,11 @@ config: update application properties for production
 
 1. **Always check changes first**: Before writing a commit message, run `git status` and `git diff` to review all changes. This ensures you don't miss any files or modifications.
 2. **Be specific**: Instead of "fix bug", use "fix(auth): resolve null pointer in token validation"
-3. **Keep it concise**: For simple changes, the subject line is often enough. Only add body for complex changes or when context is needed
+3. **Keep it concise and condensed**: The subject line should be clear and complete. Avoid detailed bullet lists in the body unless absolutely necessary for complex changes. Prefer a single, well-crafted subject line that captures the essence of the change. Only add a body when the change requires explanation of the "why" or context that isn't obvious from the code.
 4. **One logical change per commit**: Don't mix unrelated changes
 5. **Reference issues**: Use `Closes #123` or `Fixes #456` in footer when applicable
 6. **Explain why, not what**: The code shows what changed; the commit message should explain why
-7. **Avoid over-detailing**: Don't list every file changed. Focus on what was accomplished, not implementation details
+7. **Avoid over-detailing**: Don't list every file changed or implementation steps. Focus on what was accomplished at a high level, not the detailed mechanics
 
 ## Common Patterns
 
