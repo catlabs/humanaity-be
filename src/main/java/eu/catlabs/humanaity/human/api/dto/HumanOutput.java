@@ -1,17 +1,23 @@
 package eu.catlabs.humanaity.human.api.dto;
 
 import eu.catlabs.humanaity.human.domain.Personality;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 public class HumanOutput {
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Long id;
+    @Schema(name = "busy", requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean isBusy;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Double x;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Double y;
 
     private Double creativity;
