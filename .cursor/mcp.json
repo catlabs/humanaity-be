@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "humanaity-mcp": {
+      "command": "npm",
+      "args": [
+        "run",
+        "dev"
+      ],
+      "cwd": "/Users/julien/dev/humanaity/humanaity-mcp",
+      "env": {
+        "HUMANAITY_API_BASE_URL": "http://localhost:8080",
+        "HUMANAITY_API_EMAIL": "${HUMANAITY_API_EMAIL}",
+        "HUMANAITY_API_PASSWORD": "${HUMANAITY_API_PASSWORD}"
+      }
+    }
+  }
+}
