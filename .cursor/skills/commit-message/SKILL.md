@@ -7,7 +7,8 @@ description: Generate Conventional Commit messages for the Humanaity backend by 
 
 ## Goal
 
-Generate a concise Conventional Commit message for changes in `humanaity-be`.
+Generate concise Conventional Commit messages for changes in `humanaity-be`.
+When the user asks to commit changes, group the diff into coherent work subjects and create the commits in the command line instead of only proposing messages.
 Prefer staged changes because they reflect what will actually be committed.
 
 ## Mandatory Guidelines (Source of Truth)
@@ -97,6 +98,13 @@ Always inspect the repo state first:
 git status --porcelain
 ```
 
+### 1.5. Decide whether work must be split
+
+- Review the full set of changes and identify distinct work subjects
+- If the changes cover more than one subject, create multiple commits
+- Keep each commit focused on one logical behavior or documentation/config change
+- Do not mix unrelated README, config, and feature work in the same commit unless they are inseparable
+
 ### 2. Prefer staged diff
 
 - If staged changes exist, inspect:
@@ -119,6 +127,7 @@ git diff
 - Choose the most accurate `type`
 - Choose a scope only if one area clearly leads
 - Keep the message focused on why the change matters
+- If multiple subjects are present, define the commit boundaries before staging
 
 ### 4. Draft the message
 
@@ -126,9 +135,18 @@ git diff
 - Add a body only if the context is not obvious from the subject
 - Add a footer only for breaking changes or issue references provided by the user
 
-### 5. Present the message
+### 5. Commit when requested
 
-Return the final commit message inside a fenced code block.
+- If the user asks you to commit, stage only one work subject at a time
+- Create each commit yourself from the command line
+- Re-check `git status` after every commit before preparing the next one
+- Continue until all requested subjects are committed
+- If the user only asked for a commit message, do not create a commit
+
+### 6. Present the result
+
+- If you did not commit, return the final commit message inside a fenced code block
+- If you created commits, return the final list of commit subjects and hashes
 
 ## Examples
 
