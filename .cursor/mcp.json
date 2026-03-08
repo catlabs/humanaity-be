@@ -1,16 +1,13 @@
 {
   "mcpServers": {
     "humanaity-mcp": {
-      "command": "npm",
+      "command": "zsh",
       "args": [
-        "run",
-        "dev"
+        "-lc",
+        "cd /Users/julien/dev/humanaity/humanaity-mcp && set -a && source /Users/julien/dev/humanaity/humanaity-be/.env && set +a && npm run dev"
       ],
-      "cwd": "/Users/julien/dev/humanaity/humanaity-mcp",
       "env": {
-        "HUMANAITY_API_BASE_URL": "http://localhost:8080",
-        "HUMANAITY_API_EMAIL": "${HUMANAITY_API_EMAIL}",
-        "HUMANAITY_API_PASSWORD": "${HUMANAITY_API_PASSWORD}"
+        "HUMANAITY_API_BASE_URL": "http://localhost:8080"
       }
     }
   }
